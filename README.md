@@ -10,4 +10,4 @@ This utility finds the import count of any .h header file for objective-c based 
 SandeepNegi:Binary sandeepn$ /Users/sandeepn/Documents/ExtraStuff/HeaderImportCountFinder/Binary/FileImportCountFinder /Users/sandeepn/Documents/ExtraStuff/WhiteLayer/WhiteLayer
 
 # Screenshot
-![Alt text](/HeaderImportCountFinder/Resources/UsageScreenShot.png "Tutorial screenshot")
+![Alt text](https://github.com/sandynegi/HeaderImportCountFinder/blob/master/Resources/UsageScreenShot.png?raw=true "Tutorial screenshot")
