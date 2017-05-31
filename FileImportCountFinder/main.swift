@@ -42,7 +42,6 @@ extension FileManager {
         var urls = [URL]()
         enumerator(atPath: path)?.forEach({ (e) in
             guard let s = e as? String else { return }
-            //            print("filename==>" + s)
             if includeFile(filename:s) /*&& !childOfIgnoreDir(dirName:s)*/ {
                 let relativeURL = URL(fileURLWithPath: s, relativeTo: baseurl)
                 let url = relativeURL.absoluteURL
@@ -78,69 +77,58 @@ extension Data {
     }
 }
 
-class ImportFinder {
+class HeaderImportFinder {
     
     var dirPath:String = ""
     
-    func test() {
+    func search() {
         let mypath = dirPath
         let fm = FileManager()
         let arr = fm.listFiles(path: mypath)
         var currentProcessingItemIndex = 0
         var countDict = Dictionary<String, Int>()
-        msg(msg: "Dict==>")
         for item in arr {
             
             autoreleasepool {
                 
-                if item.absoluteString.hasSuffix(".h") {
-                    
-                    var tmpCount = 0
-                    
-                    var attStringSaySomething:NSAttributedString? = NSAttributedString.init(string: "#import \u{22}" + item.lastPathComponent + "\u{22}", attributes: [NSFontAttributeName: NSFont.systemFont(ofSize: 16), NSForegroundColorAttributeName:NSColor.black])
-                    
-                    var searchQuery:String? = attStringSaySomething?.string //item.lastPathComponent //"#import \u{22}" + item.lastPathComponent + "\u{22}"
+                do {
+                    // Read file content
+                    var dataObj:Data? = try Data(contentsOf:item)
+                    var attibutedString = dataObj!.attributedString
+                    var contentFromFile = attibutedString?.string
                     
                     for i in 0...arr.count-1 {
-                        
                         autoreleasepool {
                             
-                            // Read file content. Example in Swift
-                            do {
-                                // Read file content
-                                var dataObj:Data? = try Data(contentsOf:arr[i])
-                                var attibutedString = dataObj!.attributedString
-                                var contentFromFile = attibutedString?.string
+                            if arr[i].absoluteString.hasSuffix(".h") {
                                 
-                                // alternative: not case sensitive
+                                var attStringSaySomething:NSAttributedString? = NSAttributedString.init(string: "#import \u{22}" + arr[i].lastPathComponent + "\u{22}", attributes: [NSFontAttributeName: NSFont.systemFont(ofSize: 16), NSForegroundColorAttributeName:NSColor.black])
+                                
+                                var searchQuery:String? = attStringSaySomething?.string
+                                
                                 let range = contentFromFile!.range(of: searchQuery!, options: .caseInsensitive)
                                 if nil != range  {
-                                    tmpCount = tmpCount + 1
-                                    
-//                                    print("\t \t" + arr[i].lastPathComponent)
+                                    let previousCount = countDict[searchQuery!] ?? 0
+                                    countDict[searchQuery!] = 1 + previousCount
                                 }
                                 
-                                dataObj = nil
-                                attibutedString = nil
-                                contentFromFile = nil
+                                attStringSaySomething = nil
+                                searchQuery = nil
                             }
-                            catch let error as NSError {
-                                msg(msg:"An error took place: \(error)")
-                            }
-                            
                         }
                     }
                     
-                    countDict[searchQuery!] = tmpCount
-//                    msg(msg: searchQuery! + " ====> " + String(countDict[searchQuery!]!))
-                    
-                    attStringSaySomething = nil
-                    searchQuery = nil
-                    
-                    
+                    dataObj = nil
+                    attibutedString = nil
+                    contentFromFile = nil
                 }
+                catch let error as NSError {
+                    print("An error took place: \(error)")
+                }
+                
+                
                 let donePercentage = CGFloat((currentProcessingItemIndex+1)*100)/CGFloat(arr.count)
-                msg(msg:String(format: "Work done ... %.2f%%", donePercentage))
+                print(String(format: "Work done ... %.2f%%", donePercentage))
                 
                 
                 currentProcessingItemIndex += 1
@@ -148,20 +136,12 @@ class ImportFinder {
         }
         
         let sortedKeys = countDict.keysSortedByValue(isOrderedBefore: <) //sorting dictionary
-//        dict.keysSortedByValue(>) //sorting
-//        msg(msg: countDict.description)
         
-        msg(msg:"Import count + sorted result")
+        print("Import count + sorted result")
         for item in sortedKeys {
-            msg(msg: item + " ====> " + String(countDict[item]!))
+            print(item + " ====> " + String(countDict[item]!))
         }
         
-    }
-    
-    func input() -> String {
-        let keyboard = FileHandle.standardInput
-        let inputData = keyboard.availableData
-        return NSString(data: inputData, encoding:String.Encoding.utf8.rawValue)! as String
     }
     
     func cleanFilePath(path: String) -> String {
@@ -171,62 +151,24 @@ class ImportFinder {
     }
     
     func getDirPath(){
-        
-        msg(msg: "Enter project or search directory path:")
         var response:String? = CommandLine.arguments[1];
         if nil != response && 0 < (response?.characters.count)! {
             dirPath = cleanFilePath(path: response!)
         }else{
-            msg(msg: "Invlaid input")
+            print("Invlaid path input")
         }
     }
     
-    func msg(msg:String) {
-        print(msg)
-//        DispatchQueue.main.async {
-//            print(msg)
-//        }
-    }
 }
 
-//let ifObj = ImportFinder()
-//ifObj.getDirPath()
-//
-//let sema = DispatchSemaphore( value: 0)
-//DispatchQueue.global(qos: .background).async {
-//    
-//    ifObj.test()
-//    
-//    sema.signal();
-//}
-//sema.wait();
+let finderObj = HeaderImportFinder()
+finderObj.getDirPath()
 
-func addOneOrTwo(x: inout Int) {
-    defer { x = x + 1 }
-    x = x + 1
-}
-
-var x = 1
-addOneOrTwo(x: &x)
-print("x: \(x)")
-
-
-// Both operations completed
-
-
-//DispatchQueue.global().async {
-    //take dir path
-    //    ifObj.getDirPath()
+let sema = DispatchSemaphore( value: 0)
+DispatchQueue.global(qos: .background).async {
     
-
-//}
-
-//DispatchQueue.main.async(execute: {
-//    
-//    
-////    sema.signal();
-//    exit(EXIT_SUCCESS)
-//})
-
-//dispatchMain()
-//sema.wait();
+    finderObj.search()
+    
+    sema.signal();
+}
+sema.wait();
