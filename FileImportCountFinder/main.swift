@@ -189,17 +189,27 @@ class ImportFinder {
     }
 }
 
-let ifObj = ImportFinder()
-ifObj.getDirPath()
+//let ifObj = ImportFinder()
+//ifObj.getDirPath()
+//
+//let sema = DispatchSemaphore( value: 0)
+//DispatchQueue.global(qos: .background).async {
+//    
+//    ifObj.test()
+//    
+//    sema.signal();
+//}
+//sema.wait();
 
-let sema = DispatchSemaphore( value: 0)
-DispatchQueue.global(qos: .background).async {
-    
-    ifObj.test()
-    
-    sema.signal();
+func addOneOrTwo(x: inout Int) {
+    defer { x = x + 1 }
+    x = x + 1
 }
-sema.wait();
+
+var x = 1
+addOneOrTwo(x: &x)
+print("x: \(x)")
+
 
 // Both operations completed
 
