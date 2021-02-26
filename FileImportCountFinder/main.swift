@@ -69,7 +69,7 @@ extension FileManager {
 extension Data {
     var attributedString: NSAttributedString? {
         do {
-            return try NSAttributedString(data: self, options:[NSDocumentTypeDocumentAttribute:NSPlainTextDocumentType, NSCharacterEncodingDocumentAttribute: String.Encoding.utf8.rawValue], documentAttributes: nil)
+            return try NSAttributedString(data: self, options: [ NSAttributedString.DocumentReadingOptionKey.documentType: NSAttributedString.DocumentType.plain, NSAttributedString.DocumentReadingOptionKey.characterEncoding: String.Encoding.utf8.rawValue ], documentAttributes: nil)
         } catch let error as NSError {
             print(error.localizedDescription)
         }
@@ -102,7 +102,7 @@ class HeaderImportFinder {
                             
                             if arr[i].absoluteString.hasSuffix(".h") {
                                 
-                                var attStringSaySomething:NSAttributedString? = NSAttributedString.init(string: "#import \u{22}" + arr[i].lastPathComponent + "\u{22}", attributes: [NSFontAttributeName: NSFont.systemFont(ofSize: 16), NSForegroundColorAttributeName:NSColor.black])
+                                var attStringSaySomething:NSAttributedString? = NSAttributedString.init(string: "#import \u{22}" + arr[i].lastPathComponent + "\u{22}", attributes: [NSAttributedString.Key.font: NSFont.systemFont(ofSize: 16), NSAttributedString.Key.foregroundColor:NSColor.black])
                                 
                                 var searchQuery:String? = attStringSaySomething?.string
                                 
@@ -151,8 +151,8 @@ class HeaderImportFinder {
     }
     
     func getDirPath(){
-        var response:String? = CommandLine.arguments[1];
-        if nil != response && 0 < (response?.characters.count)! {
+        let response:String? = CommandLine.arguments[1];
+        if nil != response && 0 < (response?.count)! {
             dirPath = cleanFilePath(path: response!)
         }else{
             print("Invlaid path input")
