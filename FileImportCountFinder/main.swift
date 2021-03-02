@@ -101,19 +101,12 @@ class HeaderImportFinder {
                         autoreleasepool {
                             
                             if arr[i].absoluteString.hasSuffix(".h") {
-                                
-                                var attStringSaySomething:NSAttributedString? = NSAttributedString.init(string: "#import \u{22}" + arr[i].lastPathComponent + "\u{22}", attributes: [NSAttributedString.Key.font: NSFont.systemFont(ofSize: 16), NSAttributedString.Key.foregroundColor:NSColor.black])
-                                
-                                var searchQuery:String? = attStringSaySomething?.string
-                                
-                                let range = contentFromFile!.range(of: searchQuery!, options: .caseInsensitive)
-                                if nil != range  {
-                                    let previousCount = countDict[searchQuery!] ?? 0
-                                    countDict[searchQuery!] = 1 + previousCount
+                                let searchQuery = "#import \u{22}" + arr[i].lastPathComponent + "\u{22}"
+                                let isContain = contentFromFile?.contains(searchQuery)
+                                if isContain! {
+                                    let previousCount = countDict[searchQuery] ?? 0
+                                    countDict[searchQuery] = 1 + previousCount
                                 }
-                                
-                                attStringSaySomething = nil
-                                searchQuery = nil
                             }
                         }
                     }
