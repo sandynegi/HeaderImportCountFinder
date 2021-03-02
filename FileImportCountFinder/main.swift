@@ -97,7 +97,8 @@ class HeaderImportFinder {
                     var attibutedString = dataObj!.attributedString
                     var contentFromFile = attibutedString?.string
                     
-                    for i in 0...arr.count-1 {
+                    let count = arr.count - 1
+                    for i in 0...count {
                         autoreleasepool {
                             
                             if arr[i].absoluteString.hasSuffix(".h") {
